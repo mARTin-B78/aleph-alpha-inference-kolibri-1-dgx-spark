@@ -1,0 +1,8 @@
+# Generic LiteLLM proxy entry pointing at the local OpenAI-compatible server.
+model_list:
+  - model_name: kolibri-1
+    litellm_params:
+      model: openai/Kolibri-1
+      api_base: http://127.0.0.1:8000/v1
+      api_key: "none"            # server has no auth; use a real key behind your own gateway
+      timeout: 1800

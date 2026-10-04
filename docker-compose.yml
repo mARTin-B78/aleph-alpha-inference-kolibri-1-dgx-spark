@@ -1,0 +1,37 @@
+# Config-validated only (docker compose config -q). The run arguments are taken from a
+# tested launch of the same image (verified via docker inspect), not from this file.
+services:
+  kolibri:
+    build: .
+    image: vllm-kolibri:0.29.0-aai1.0.0
+    container_name: vllm-kolibri-1
+    restart: unless-stopped
+    ipc: host
+    gpus: all
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${PORT:-8000}:8000"
+    volumes:
+      - ${MODEL_DIR:?set MODEL_DIR in .env}:/model:ro
+    environment:
+      PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
+      OMP_NUM_THREADS: "4"
+      HF_HUB_OFFLINE: "1"
+    command:
+      - /model
+      - --host=0.0.0.0
+      - --port=8000
+      - --gpu-memory-utilization=${GMEM:-0.78}
+      - --max-model-len=${MAX_MODEL_LEN:-131072}
+      - --max-num-seqs=${MAX_NUM_SEQS:-4}
+      - --served-model-name=Kolibri-1
+      - --kv-cache-dtype=fp8
+      - --enable-prefix-caching
+      - --reasoning-parser=kolibri1
+      - --tool-call-parser=kolibri1
+      - --enable-auto-tool-choice
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8000/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30m

@@ -1,0 +1,9 @@
+# Generic llama-swap entry (adapt names/paths). Starts the compose service on demand.
+models:
+  Kolibri-1:
+    ttl: 0
+    readyTimeout: 1800          # load takes 18-25 min on GB10
+    checkEndpoint: /health
+    proxy: http://127.0.0.1:8000
+    cmd: docker compose -f /path/to/repo/docker-compose.yml up
+    cmdStop: docker compose -f /path/to/repo/docker-compose.yml stop
